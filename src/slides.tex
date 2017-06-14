@@ -10,6 +10,16 @@
 \usepackage[utf8]{inputenc}
 \usepackage{hyperref}
 \usepackage{eurosym}
+\usepackage{caption}
+\usepackage{amssymb,amsmath,amsthm}
+
+\usepackage[outputdir=_build]{minted}
+
+%Pour les règles d'inférence.
+\usepackage{mathpartir}
+
+\newcommand{\lambdaExpr}[2]{\lambda #1 . \, #2}
+\newcommand{\lambdaExprType}[2]{\Lambda #1 . \, #2}
 
 \usetheme[navigation]{UMONS}
 
@@ -21,13 +31,198 @@
 
 \maketitle
 
-\begin{frame}[plain]
+\begin{frame}
 	\tableofcontents
 \end{frame}
 
-\section{Introduction}
+\section{Introduction - OCaml}
 
-\begin{frame}[plain]
+\begin{frame}
+	\begin{center}
+		\Huge{Introduction - OCaml}
+	\end{center}
 \end{frame}
+
+\begin{frame}
+  \frametitle{OCaml}
+  Commençons par parler d'OCaml...
+	\begin{center}
+    \begin{itemize}
+    \item langage fonctionnel : fonctions sont des citoyens de première classe
+      et ce \og nativement \fg.
+    \item statiquement typé : les types sont assignés à la compilation, non à
+      l'exécution. $\neq$ dynamiquement typé (Python).
+    \item dispose d'algorithmes d'inférence de type : pas obligé d'assigner
+      manuellement un type à un terme (contrairement à C ou Java).
+    \item divisé en deux \og langages \fg :
+      \begin{itemize}
+      \item langage de base : fonctions, enregistrements, tuples, ...
+      \item langage de modules : modules (type = signature), foncteurs.
+      \end{itemize}
+    \item les deux langages possèdent des algorithmes d'inférence de types différents.
+    \end{itemize}
+	\end{center}
+\end{frame}
+
+\begin{frame}
+  \inputminted{OCaml}{codes/intro_point2D.ml}
+  \begin{center}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \inputminted{OCaml}{codes/intro_point2D_polymorphic.ml}
+  \begin{center}
+  \end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{But du mémoire}
+  \begin{itemize}
+  \item Définir un calcul théorique où les deux langages (et en particulier les
+    règles de typage et de sous-typage) sont unifiés. Calcul choisi : DOT (2016).
+  \item Unification de la notion de module et d'enregistrement. Ces deux termes
+    et leurs types sont représentés de la même manière ($\neq$ en OCaml).
+  \item Implémenter un langage de surface, proche d'OCaml, un algorithme de
+    typage et un algorithme de sous-typage pour écrire des programmes DOT.
+    Langage : RML (apport principal de ce mémoire).
+  \end{itemize}
+\end{frame}
+
+\section{Programmation fonctionnelle et typage}
+
+\begin{frame}
+	\begin{center}
+		\Huge{Programmation fonctionnelle et typage}
+	\end{center}
+\end{frame}
+
+\subsection{Programmation fonctionnelle : $\lambda$-calcul non typé}
+
+\begin{frame}
+  \frametitle{$\lambda$-calcul non typé}
+  Calcul = syntaxe (termes) + sémantique (règles d'évaluation).
+
+  Soit $V$ un ensemble infini dénombrable de variables. La syntaxe du
+  $\lambda$-calcul est définie comme le plus petit ensemble $\Lambda$ tel que
+
+  \begin{minipage}{0.45\textwidth}
+    % TODO Couleur roug e quand l'autre syntaxe est utilisée.
+    \begin{enumerate}
+    \item $V \subseteq \Lambda$
+    \item $\forall u, v \in \Lambda, uv \in \Lambda$
+    \item $\forall x \in V, \forall u \in \Lambda, \lambdaExpr{x}{u} \in \Lambda$
+    \end{enumerate}
+  \end{minipage}
+  \begin{minipage}{0.05\textwidth}
+    $\Leftrightarrow$
+  \end{minipage}
+  \begin{minipage}{0.45\textwidth}
+    % TODO Couleur verte et peut-être affiché à la fin.
+    \begin{align*}
+      t ::= & \, & \text{terme} \\
+        & \; x & \text{var} \\
+        & \; t \, t & \text{app} \\
+        & \; \lambdaExpr{x}{t} & \text{abs}
+    \end{align*}
+  \end{minipage}
+  \begin{enumerate}
+  \item $uv \rightarrow$ application d'une fonction $u$ à un paramètre $v$.
+  \item $\lambdaExpr{x}{v} \rightarrow$ définition d'une fonction (anonyme) qui
+    prend un paramètre $x$ et renvoie $v$. 
+  \end{enumerate}
+  \
+\end{frame}
+
+\subsection{Typage : $\lambda$-calcul simplement typé}
+
+\begin{frame}
+  \frametitle{$\lambda$-calcul simplement typé}
+  But : classifier les termes en fonction de leur nature.
+\end{frame}
+
+\begin{frame}
+  \frametitle{$\lambda$-calcul simplement typé}
+  Théoèmes importants qui permet d'affirmer \og un terme bien typé ne bloque pas \fg.
+  \begin{enumerate}
+  \item Préservation : si un terme $t$ est de type $T$ et $t$ s'évalue en $t'$,
+    alors $t'$ est de type $T$.
+  \item Progression : si un terme $t$ est de type $T$, alors soit $t$ est une
+    valeur, soit $t$ s'évalue en $t'$.
+  \end{enumerate}
+  Ces théorèmes sont vrais pour tous les calculs définis dans ces transparents.
+\end{frame}
+
+\subsection{(Polymorphisme par) sous-typage et enregistrements}
+
+\begin{frame}
+  \frametitle{(Polymorphisme par) sous-typage et enregistrement}
+\end{frame}
+
+\subsection{Polymorphisme paramétré : Système F}
+
+\begin{frame}
+  \frametitle{Polymorphisme paramétré : Système F}
+  But : 
+\end{frame}
+
+\subsection{Système $F_{<:}$}
+
+\begin{frame}
+  \frametitle{Système $F_{<:}$}
+  But : unifier le polymorphisme par sous-typage et le polyphormisme paramétré.
+\end{frame}
+
+\section{Modules de première classe : DOT}
+
+\begin{frame}
+	\begin{center}
+		\Huge{Modules de première classe : DOT}
+	\end{center}
+\end{frame}
+
+
+\section{Implémentation : RML}
+
+\begin{frame}
+	\begin{center}
+		\Huge{Implémentation : RML}
+	\end{center}
+\end{frame}
+
+\begin{frame}
+  Problèmes:
+  \begin{enumerate}
+  \item Un même jugement de typage peut être dérivé de plusieurs manières.
+  \item Une même question peut être posée plusieurs fois.
+  \item Indécidabilité du sous-typage.
+  \end{enumerate}
+\end{frame}
+
+%\section{Travail futur}
+%
+%\begin{frame}
+%	\begin{center}
+%		\Huge{Travail futur}
+%	\end{center}
+%\end{frame}
+%
+%\section{Domaines non explorés}
+%
+%\begin{frame}
+%	\begin{center}
+%		\Huge{Domaines non explorés}
+%	\end{center}
+%\end{frame}
+%
+%
+%\begin{frame}
+%  \begin{itemize}
+%  \item Théorie des catégories.
+%  \item Théorie des types.
+%  \item Théorie homotopique des types.
+%  \item Sémantique dénotationnelle.
+%  \end{itemize}
+%\end{frame}
 
 \end{document}
