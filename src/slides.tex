@@ -19,7 +19,10 @@
 \usepackage{mathpartir}
 
 \newcommand{\lambdaExpr}[2]{\lambda #1 . \, #2}
-\newcommand{\lambdaExprType}[2]{\Lambda #1 . \, #2}
+\newcommand{\localLetBinding}[3]{let \; #1 \; = \; #2 \; in \; #3}
+
+\definecolor{red}{RGB}{243, 3, 3}
+\definecolor{green}{RGB}{3, 243, 3}
 
 \usetheme[navigation]{UMONS}
 
@@ -64,17 +67,17 @@
 	\end{center}
 \end{frame}
 
-\begin{frame}
-  \inputminted{OCaml}{codes/intro_point2D.ml}
-  \begin{center}
-  \end{center}
-\end{frame}
-
-\begin{frame}
-  \inputminted{OCaml}{codes/intro_point2D_polymorphic.ml}
-  \begin{center}
-  \end{center}
-\end{frame}
+%\begin{frame}
+%  \inputminted{OCaml}{codes/intro_point2D.ml}
+%  \begin{center}
+%  \end{center}
+%\end{frame}
+%
+%\begin{frame}
+%  \inputminted{OCaml}{codes/intro_point2D_polymorphic.ml}
+%  \begin{center}
+%  \end{center}
+%\end{frame}
 
 \begin{frame}
   \frametitle{But du mémoire}
@@ -83,9 +86,9 @@
     règles de typage et de sous-typage) sont unifiés. Calcul choisi : DOT (2016).
   \item Unification de la notion de module et d'enregistrement. Ces deux termes
     et leurs types sont représentés de la même manière ($\neq$ en OCaml).
-  \item Implémenter un langage de surface, proche d'OCaml, un algorithme de
+  \item (Apport principal de ce mémoire). Implémenter un langage de surface, proche d'OCaml, un algorithme de
     typage et un algorithme de sous-typage pour écrire des programmes DOT.
-    Langage : RML (apport principal de ce mémoire).
+    Langage : RML
   \end{itemize}
 \end{frame}
 
@@ -97,17 +100,17 @@
 	\end{center}
 \end{frame}
 
-\subsection{Programmation fonctionnelle : $\lambda$-calcul non typé}
+\subsection*{Programmation fonctionnelle : $\lambda$-calcul non typé}
 
 \begin{frame}
   \frametitle{$\lambda$-calcul non typé}
-  Calcul = syntaxe (termes) + sémantique (règles d'évaluation).
+  Calcul = syntaxe (termes) + sémantique (règles d'évaluation, non discutée).
 
   Soit $V$ un ensemble infini dénombrable de variables. La syntaxe du
   $\lambda$-calcul est définie comme le plus petit ensemble $\Lambda$ tel que
 
   \begin{minipage}{0.45\textwidth}
-    % TODO Couleur roug e quand l'autre syntaxe est utilisée.
+    % TODO Couleur rouge quand l'autre syntaxe est utilisée.
     \begin{enumerate}
     \item $V \subseteq \Lambda$
     \item $\forall u, v \in \Lambda, uv \in \Lambda$
@@ -126,24 +129,82 @@
         & \; \lambdaExpr{x}{t} & \text{abs}
     \end{align*}
   \end{minipage}
-  \begin{enumerate}
+  \begin{itemize}
   \item $uv \rightarrow$ application d'une fonction $u$ à un paramètre $v$.
-  \item $\lambdaExpr{x}{v} \rightarrow$ définition d'une fonction (anonyme) qui
-    prend un paramètre $x$ et renvoie $v$. 
-  \end{enumerate}
-  \
+  \item $\lambdaExpr{x}{u} \rightarrow$ définition d'une fonction (anonyme) qui
+    prend un paramètre $x$ et renvoie $u$. 
+  \end{itemize}
 \end{frame}
 
-\subsection{Typage : $\lambda$-calcul simplement typé}
+%\begin{frame}
+%  \frametitle{$\lambda$-calcul non typé - Sémantique}
+%\end{frame}
+
+\subsection*{Typage : $\lambda$-calcul simplement typé}
 
 \begin{frame}
   \frametitle{$\lambda$-calcul simplement typé}
-  But : classifier les termes en fonction de leur nature.
+  \begin{itemize}
+    \item Classer les termes en fonction de leur nature $\rightarrow$ notion de type.
+    \item Exemple pour le terme $uv$: $u$ doit être moralement une fonction qui prend un
+      paramètre $v$ d'un certain type $T_{1}$. On note $T_{1} \rightarrow T_{2}$ le
+      type de $u$ (type fléche) où $T_{2}$ est le type de retour de $u$.
+    \item Formellement, on se donne $\tau$, un ensemble de type, les éléments
+      étant notés $T$ et on définit une relation de typage
+      entre $\Lambda$ et $\tau$. On note $t : T$ pour dire que $t$ est de type
+      $T$. On dit aussi que $t$ est bien typé.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Syntaxe des types du $\lambda$-calcul simplement typé}
+  On se donne $\mathcal{B}$ un ensemble de types de base, ses éléments étant notés
+  $B$ et on définit la syntaxe des types du $\lambda$-calcul simplement typé par
+  \begin{align*}
+    T ::= & \, & \text{types} \\
+          & \; B & \text{base} \\
+          & \; T \rightarrow T & \text{type des fonctions}
+  \end{align*}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Contexte et jugement de typage, différence de syntaxe}
+  \begin{itemize}
+  \item $\lambdaExpr{x}{t}$ : type de $x$ ? $\Rightarrow$ on annote la variable
+    avec son type. $\lambdaExpr{x}{t}$ devient $\lambdaExpr{x : T}{t}$.
+  \item un terme $t$ peut contenir des variables $\Rightarrow$ besoin de
+    connaitre le type de celles-ci pour typer $t$ $\Rightarrow$ contexte de
+    typage $\Gamma$.
+  \item Un \textbf{contexte (ou environnement) de typage} est une suite $(x_{i}, T_{i})$ où $x_{i}$ est une
+    variable et $T_{i}$ est le type de $x_{i}$, noté $\Gamma$. L'union d'un
+    contexte $\Gamma$ avec un couple $(x, T)$ est noté $\Gamma, x : T$.
+  \item $t : T$ devient $\Gamma \vdash t : T$ (appelé \textbf{jugement de typage}).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Règles de typage}
+  Pour typer un terme $t$, on utilise des \textbf{règles de typage}. Une règle de typage
+  permet de dériver des jugements de typage à partir d'autres jugements de
+  typage ou d'axiome. Une succession d'utilisation de règles de typage mène à \textbf{un arbre de dérivation}.
+  \begin{mathpar}
+    \inferrule
+      {(x : T) \in \Gamma}
+      {\Gamma \vdash x : T} \quad (\textsc{T-VAR})
+    \and
+    \inferrule
+      {\Gamma, x : T_{1} \vdash t : T_{2}}
+      {\Gamma \vdash \lambdaExpr{x : T_{1}}{t} : T_{1} \rightarrow T_{2}} \quad (\textsc{T-ABS})
+    \and
+    \inferrule
+      {\Gamma \vdash u : T_{1} \rightarrow T_{2} \\ \Gamma \vdash v : T_{1}}
+      {\Gamma \vdash u \, v : T_{2}} \quad (\textsc{T-APP})
+  \end{mathpar}
 \end{frame}
 
 \begin{frame}
   \frametitle{$\lambda$-calcul simplement typé}
-  Théoèmes importants qui permet d'affirmer \og un terme bien typé ne bloque pas \fg.
+  Théorèmes importants qui permettent d'affirmer \og un terme bien typé ne bloque pas \fg.
   \begin{enumerate}
   \item Préservation : si un terme $t$ est de type $T$ et $t$ s'évalue en $t'$,
     alors $t'$ est de type $T$.
@@ -151,51 +212,268 @@
     valeur, soit $t$ s'évalue en $t'$.
   \end{enumerate}
   Ces théorèmes sont vrais pour tous les calculs définis dans ces transparents.
+
+  Les preuves se font le plus souvent sur l'arbre de dérivation.
 \end{frame}
 
-\subsection{(Polymorphisme par) sous-typage et enregistrements}
+\subsection*{Sous-typage et enregistrements}
 
 \begin{frame}
-  \frametitle{(Polymorphisme par) sous-typage et enregistrement}
+  \frametitle{Sous-typage et enregistrement}
+  \begin{itemize}
+  \item But : affiner notre relation de typage en définissant une relation binaire (dite de
+    \textbf{sous-typage}) sur les types.
+  \item Notation : $S <: T$ ($S$ est sous-type de $T$).
+  \item Règle de typage qui crée un lien entre la relation de typage et la
+    relation de sous-typage : (T-SUB).
+    \begin{mathpar}
+      \inferrule
+      {\Gamma \vdash t : S \\ S <: T}
+      {\Gamma \vdash t : T} \quad (\textsc{T-SUB})
+    \end{mathpar}
+  \end{itemize}
+
+
 \end{frame}
 
-\subsection{Polymorphisme paramétré : Système F}
+%\subsection*{Polymorphisme paramétré}
+%
+%\begin{frame}
+%  \frametitle{Polymorphisme paramétré : Système F}
+%  But : 
+%\end{frame}
 
-\begin{frame}
-  \frametitle{Polymorphisme paramétré : Système F}
-  But : 
-\end{frame}
-
-\subsection{Système $F_{<:}$}
-
-\begin{frame}
-  \frametitle{Système $F_{<:}$}
-  But : unifier le polymorphisme par sous-typage et le polyphormisme paramétré.
-\end{frame}
-
-\section{Modules de première classe : DOT}
+\section{DOT}
 
 \begin{frame}
 	\begin{center}
-		\Huge{Modules de première classe : DOT}
+		\Huge{DOT}
 	\end{center}
 \end{frame}
 
+\begin{frame}
+  \begin{minipage}{0.45\textwidth}
+    \begin{align*}
+      t ::= & \, & \text{terme} \\
+            & \; x, y & \text{var} \\
+            & \; \lambdaExpr{x : T}{t} & \text{abs} \\
+            & \; x \, y & \text{app} \\
+            & \; \localLetBinding{x}{t}{t} & \text{let} \\
+            & \; \nu(x : T^{x})d & \text{rec} \\
+            & \; x.a & \text{champ proj} \\
+    \end{align*}
+  \end{minipage}
+  \begin{minipage}{0.45\textwidth}
+    \begin{align*}
+      d ::= & \, & \text{decl} \\
+            & \; \left\{ a = t \right\} & \text{champ} \\
+            & \; \left\{ A = T \right\} & \text{type} \\
+            & \; d \wedge d & \text{aggregation}
+    \end{align*}
+  \end{minipage}
+\end{frame} 
+
+\begin{frame}
+  \begin{align*}
+    S, T ::= & \, & \text{type} \\
+             & \; Top & \text{top} \\
+             & \; Bottom & \text{bottom} \\
+             & \; \forall(x : S) T^{x} & \text{fonction} \\
+             & \; \left\{ A : S .. T \right\} & \text{type decl} \\
+             & \; \left\{ a : T \right\} & \text{champ decl} \\
+             & \; x.A & \text{type proj} \\
+             & \; \mu(x : T^{x}) & \text{rec} \\
+             & \; S \wedge T & \text{inter}
+  \end{align*}
+\end{frame} 
+
+
+\begin{frame}
+  \frametitle{DOT : règles typage (1/3)}
+  \begin{mathpar}
+    \inferrule
+    {\Gamma, x : T, \Gamma' \vdash x : T}
+    {} \quad (\textsc{T-VAR})
+    \and
+    \inferrule
+    {\Gamma \vdash t : S \\ \Gamma \vdash S <: T}
+    {\Gamma \vdash t : T} \quad (\textsc{T-SUB})
+    \and
+    \inferrule
+    {\Gamma, x : T \vdash t : U \\ x \notin FV(T)}
+    {\Gamma \vdash \lambdaExpr{x : T}{t} : \forall(x : T) U^{x}} \quad (\textsc{ALL-I})
+    \and
+    \inferrule
+    {\Gamma \vdash x : \forall(z : S) T^{z} \\ \Gamma \vdash y : S}
+    {\Gamma \vdash x \; y : [z := y] T^{z}} \quad (\textsc{ALL-E})
+    \and
+    \inferrule
+    {\Gamma \vdash t : T \\ \Gamma, x : T \vdash u : U \\ x \notin FV(U)}
+    {\Gamma \vdash \localLetBinding{x}{t}{u} : U} \quad (\textsc{LET})
+  \end{mathpar}
+\end{frame} 
+
+\begin{frame}
+  \frametitle{DOT : règles de typage (2/3)}
+  \begin{mathpar}
+    \inferrule
+    {\Gamma \vdash x : T \\ \Gamma \vdash x : U}
+    {\Gamma \vdash x : T \wedge U} \quad (\textsc{AND-I})
+    \and
+    \inferrule
+    {\Gamma, x : T \vdash d : T}
+    {\Gamma \vdash \nu(x : T^{x})d : \mu(x : T^{x})} \quad (\textsc{$\left\{ \; \right\}$-I})
+    \and
+    \inferrule
+    {\Gamma \vdash x : T^{x}}
+    {\Gamma \vdash x : \mu(z : T^{z})}  \quad (\textsc{VAR-PACK})
+    \and
+    \inferrule
+    {\Gamma \vdash x : \mu(z : T^{z})}
+    {\Gamma \vdash x : T^{x}}  \quad (\textsc{VAR-UNPACK})
+    \and
+    \inferrule
+    {\Gamma \vdash x : \left\{ a : T \right\}}
+    {\Gamma \vdash x.a : T} \quad (\textsc{FLD-E})
+  \end{mathpar}
+\end{frame}
+
+\begin{frame}
+  \frametitle{DOT : règles de typage (3/3)}
+  \begin{mathpar}
+    \inferrule
+    {}
+    {\Gamma \vdash \left\{ A = T \right\} : \left\{ A : T  .. T \right\}} \quad (\textsc{TYP-I})
+    \and
+    \inferrule
+    {\Gamma \vdash d_{1} : T_{1} \\ \Gamma \vdash d_{2} : T_{2} \\ dom(d_{1})
+      \cap dom(d_{2}) = \emptyset}
+    {\Gamma \vdash d_{1} \wedge d_{2} : T_{1} \wedge T_{2}} \quad (\textsc{ANDDEF-I})
+    \and
+    \inferrule
+    {\Gamma \vdash t : T}
+    {\Gamma \vdash \left\{ a : t \right\} : \left\{ a : T \right\}} \quad (\textsc{FLD-I})
+  \end{mathpar}
+\end{frame} 
+
+\begin{frame}
+  \frametitle{DOT : règles de sous-typage (1/2)}
+  \begin{mathpar}
+    \inferrule
+    {\Gamma \vdash T <: Top}
+    {}
+    \quad (\textsc{S-TOP})
+    \and
+    \inferrule
+    {\Gamma \vdash Bottom <: T}
+    {}
+    \quad (\textsc{S-Bottom})
+    \and
+    \inferrule
+    {\Gamma \vdash S <: T \\ \Gamma \vdash T <: U}
+    {\Gamma \vdash S <: U}
+    \quad (\textsc{S-TRANS})
+    \and
+    \inferrule
+    {\Gamma \vdash T <: T}
+    {}
+    \quad (\textsc{S-REFL})
+    \and
+    \inferrule
+    {\Gamma \vdash S_{2} <: S_{1} \\ \Gamma, x : S_{2} \vdash T_{1} <: T_{2}}
+    {\Gamma \vdash \forall(x : S_{1}) T_{1} <: \forall(x : S_{2}) T_{2}}
+    \quad (\textsc{ALL<:ALL})
+    \and
+    \inferrule
+    {\Gamma \vdash x : \left\{ A : S .. T \right\}}
+    {\Gamma \vdash S <: x.A}
+    \quad (\textsc{<: SEL})
+  \end{mathpar}
+\end{frame}
+
+\begin{frame}
+  \frametitle{DOT : règles de sous-typage (2/2)}
+  \begin{mathpar}
+    \inferrule
+    {\Gamma \vdash x : \left\{ A : S .. T \right\}}
+    {\Gamma \vdash x.A <: T}
+    \quad (\textsc{SEL <:})
+    \and
+    \inferrule
+    {\Gamma \vdash T \wedge U <: T}
+    {}
+    \quad (\textsc{AND-1-<:})
+    \and
+    \inferrule
+    {\Gamma \vdash T \wedge U <: U}
+    {}
+    \quad (\textsc{AND-2-<:})
+    \and
+    \inferrule
+    {\Gamma \vdash S <: T \\ \Gamma \vdash S <: U}
+    {\Gamma \vdash S <: T \wedge U}
+    \quad (\textsc{<: AND})
+    \and
+    \inferrule
+    {\Gamma \vdash S_{2} <: S_{1} \\ \Gamma \vdash T_{1} <: T_{2}}
+    {\Gamma \vdash \left\{ A : S_{1} .. T_{1} \right\} <: \left\{ A : S_{2} ..
+        T_{2} \right\}}
+    \quad (\textsc{TYP<:TYP})
+    \and
+    \inferrule
+    {\Gamma \vdash T <: U}
+    {\Gamma \vdash \left\{ a : T \right\} <: \left\{ a : U \right\}}
+    \quad (\textsc{FLD <: FLD})
+  \end{mathpar}
+\end{frame}
 
 \section{Implémentation : RML}
 
 \begin{frame}
 	\begin{center}
-		\Huge{Implémentation : RML}
+		\Huge{Implémentation de DOT en OCaml : RML}
 	\end{center}
 \end{frame}
 
 \begin{frame}
-  Problèmes:
+  \frametitle{Implémentation : remarques}
+	\begin{center}
+    \begin{enumerate}
+      \item Aucun papier ne décrit l'implémentation d'algorithmes de typage et
+        de sous-typage pour DOT.
+      \item Besoin de définir un langage de surface (= un langage plus haut
+        niveau et plus facile à lire que le calcul théorique).
+      \item RML implémente des sucres syntaxiques pour écrire plus
+        facilement des programmes.
+      \item RML implémente un algorithme d'inférence de type pour les modules.
+        Par défaut, la définition d'un module est obligatoirement liée à une signature.
+      \item Plusieurs problèmes détectés lors de l'implémentation.
+      \end{enumerate}
+	\end{center}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Implémentation : pas si facile...}
+  Passer de la théorie à l'implémentation n'est pas facile !
   \begin{enumerate}
+  \item Gestion des variables libres et liées (utilisation d'AlphaLib).
   \item Un même jugement de typage peut être dérivé de plusieurs manières.
-  \item Une même question peut être posée plusieurs fois.
+  \item Une même question $S <: T$ peut être posée plusieurs fois (ex: liste
+    avec tail).
   \item Indécidabilité du sous-typage.
+  \item Le sous-typage dépend du typage à travers (SEL <:) et (<: SEL). \textbf{Pas usuel.}
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Implémentation : problèmes}
+  Problèmes rencontrés lors de l'implémentation et non décrits dans les
+  différents papiers:
+  \begin{enumerate}
+  \item DOT n'est pas stable par insertion de binding locaux variable-variable.
+  \item Il est nécessaire d'implémenter un algorithme intermédiaire
+    (best\_bound) dans le cas où une question $x.t <: y.t$ est posée. Ce dernier
+    n'est pas évident !
   \end{enumerate}
 \end{frame}
 
