@@ -1,0 +1,5 @@
+let module Point2D = struct(point)
+  type t = { x : Int.t ; y : Int.t }
+  let add = fun(p1 : point.t, p2 : point.t) ->
+    { x = Int.plus p1.x p2.x ; y = Int.plus p1.y p2.y }
+end;;

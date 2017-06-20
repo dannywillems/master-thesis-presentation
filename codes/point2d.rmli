@@ -1,0 +1,15 @@
+sig(point) 
+  type t = sig('self) (* enregistrement *)
+    val x : Int.t
+    val y : Int.t
+  end .. sig('self)
+    val x : Int.t
+    val y : Int.t
+  end
+  val add : forall(p1 : point.t) (* fonction *)
+            forall(p2 : point.t)
+    sig('self)
+      val x : Int.t
+      val y : Int.t
+    end
+end

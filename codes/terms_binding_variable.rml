@@ -1,0 +1,10 @@
+let module M = struct
+  type t = Int.t
+  let x : self.t = 42
+end;; (* Module contenant un champ t et une valeur x *)
+
+let f =
+  fun(m : sig type t val x : self.t end, x : Int.t) ->
+    m.x;;
+
+f M 4;; (* Type = n.t, n n'existant pas en dehors de f *)
