@@ -1,10 +1,10 @@
-let module M = struct
+let module M = struct(self)
   type t = Int.t
-  let x : self.t = 42
-end;; (* Module contenant un champ t et une valeur x *)
+  let a : self.t = 5
+end;;
 
-let f =
-  fun(m : sig type t val x : self.t end, x : Int.t) ->
-    m.x;;
-
-f M 4;; (* Type = n.t, n n'existant pas en dehors de f *)
+(* Type M_local.t.
+   Or M_local n'existe pas en dehors de
+   la liaison locale.
+*)
+let M_local = M in M_local.a;;

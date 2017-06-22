@@ -12,6 +12,8 @@
 \usepackage{eurosym}
 \usepackage{caption}
 \usepackage{amssymb,amsmath,amsthm}
+\usepackage{colortbl}
+\usepackage{tikz}
 
 \usepackage[outputdir=_build]{minted}
 
@@ -60,9 +62,9 @@
     \item divisé en deux \og langages \fg :
       \begin{itemize}
       \item langage de base : fonctions, enregistrements, tuples, variables, ...
-      \item langage de modules : modules (type = signature), foncteurs.
+      \item langage de modules : modules, foncteurs.
       \end{itemize}
-    \item \textbf{Problème : }les deux langages possèdent des algorithmes d'inférence de types
+    \item \textbf{Problème : }les deux langages possèdent des algorithmes d'inférence de type
       différents et sont gérés différement par le compilateur.
     \end{itemize}
 	\end{center}
@@ -241,7 +243,8 @@
   \item Progression : si $t : T$, alors soit $t$ est une
     valeur, soit $t \rightarrow t'$.
   \end{enumerate}
-  Preuves : lemmes intermédiaires + induction sur l'arbre de dérivation.
+  Preuves : lemmes intermédiaires + induction sur la dérivation $t : T$ ou $t
+  \rightarrow t'$.
 \end{frame}
 
 \subsection*{Sous-typage et enregistrements}
@@ -249,8 +252,8 @@
 \begin{frame}
   \frametitle{Sous-typage}
   \begin{itemize}
-  \item But : affiner notre relation de typage en définissant une relation binaire (dite de
-    \textbf{sous-typage}) sur les types.
+  \item But : affiner notre relation de typage en définissant une relation
+    binaire sur les types (dite de \textbf{sous-typage}).
   \item Notation : $S <: T$ ($S$ est sous-type de $T$).
   \item Ajout d'une règle de typage qui crée un lien entre la relation de typage et la
     relation de sous-typage.
@@ -280,13 +283,12 @@
   \item enregistrement = ensemble de labels liés à des termes. Par exemple
     $\left\{ l_{1} = 5 ; l_{2} = \lambdaExpr{x}42 \right\}$.
   \item Les champs ne sont pas mutuellement dépendants!
-  \item Formellement, la syntaxe des termes et des types deviennent
     \begin{minipage}{0.45\textwidth}
       \begin{align*}
         t ::= & \, & \text{terme} \\
-              & \; x & \text{var} \\
-              & \; t \, t & \text{app} \\
-              & \; \lambdaExpr{x : T}{t} & \text{abs} \\
+              & \; {\color{gray}x} & {\color{gray}\text{var}} \\
+              & \; {\color{gray}t \, t} & {\color{gray}\text{app}} \\
+              & \; {\color{gray}\lambdaExpr{x : T}{t}} & {\color{gray}\text{abs}} \\
               & \; \left\{ l_{i} = t_{i} \right\}^{1 \leq i \leq n} & \text{enreg} \\
               & \; t.l & \text{proj}
       \end{align*}
@@ -294,13 +296,39 @@
     \begin{minipage}{0.45\textwidth}
       \begin{align*}
         T ::= & \, & \text{type} \\
-              & \; T \rightarrow T & \text{fonction} \\
+              & \; {\color{gray}T \rightarrow T} & {\color{gray}\text{fonction}} \\
               & \; \left\{ l_{i} : T_{i} \right\}^{1 \leq i \leq n} & \text{enreg}
       \end{align*}
     \end{minipage}
   \end{itemize}
 \end{frame}
 
+\begin{frame}
+  \frametitle{Sous-typage et enregistrement}
+  \begin{mathpar}
+    \inferrule
+    {\left\{ l_{i} : T_{i} \right\}^{1 \leq i \leq n + k} <: \left\{ l_{i} :
+        T_{i} \right\}^{1 \leq i \leq n}}
+    {}
+    \quad (\textsc{S-RCD-WIDTH})
+    \and
+    \inferrule
+    {\left\{ k_{j} : S_{j} \right\}^{1 \leq j \leq n} \text{ permutation de }
+      \left\{ l_{i} : T_{i} \right\} ^ {1 \leq i \leq n}}
+    { \left\{ k_{j} : S_{j} \right\} ^ {1 \leq j \leq n} <:
+      \left\{ l_{i} : T_{i} \right\} ^ {1 \leq i \leq n}}
+    \quad (\textsc{S-RCD-PERM})
+    \and
+    \inferrule
+    {\forall i \in \left\{1, ..., n \right\}, S_{i} <: T_{i}}
+    {\left\{ l_{i} : S_{i} \right\}^{1 \leq i \leq n} <: \left\{ l_{i} : T_{i}
+      \right\}^{1 \leq i \leq n}}
+    \quad (\textsc{S-RCD-DEPTH})
+  \end{mathpar}
+
+  (T-SUB) et (S-RCD-WIDTH) $\rightarrow (\lambdaExpr{p : \left\{ x : \mathbb{R}
+    \right\}}{p.x}) \left\{ x = \pi ; y = 42 \right\}$ bien typé.
+\end{frame}
 
 \section{DOT}
 
@@ -317,7 +345,7 @@
     dépendants ($x.A$).
   \item Un enregistrement peut avoir des champs mutuellement dépendants grâce à
     une variable interne.
-  \item Les fonctions deviennent dépendantes : le types de retour peut dépendre
+  \item Les fonctions deviennent dépendantes : le type de retour peut dépendre
     du paramètre.
   \end{itemize}
 \end{frame}
@@ -327,12 +355,12 @@
   \begin{minipage}{0.45\textwidth}
     \begin{align*}
       t ::= & \, & \text{terme} \\
-            & \; x, y & \text{var} \\
-            & \; \lambdaExpr{x : T}{t} & \text{abs} \\
-            & \; x \, y & \text{app} \\
+            & \; {\color{gray}x, y} & {\color{gray}\text{var}} \\
+            & \; {\color{gray}\lambdaExpr{x : T}{t}} & {\color{gray}\text{abs}} \\
+            & \; {\color{red}x \, y} & \text{app} \\
+            & \; {\color{red}x}.a & \text{champ proj} \\
             & \; \localLetBinding{x}{t}{t} & \text{let} \\
             & \; \nu(x : T^{x})d & \text{rec} \\
-            & \; x.a & \text{champ proj} \\
     \end{align*}
   \end{minipage}
   \begin{minipage}{0.45\textwidth}
@@ -354,15 +382,18 @@
              & \; \forall(x : S) T^{x} & \text{fonction} \\
              & \; \left\{ A : S .. T \right\} & \text{type decl} \\
              & \; \left\{ a : T \right\} & \text{champ decl} \\
+             & \; S \wedge T & \text{inter} \\
              & \; x.A & \text{type proj} \\
              & \; \mu(x : T^{x}) & \text{rec} \\
-             & \; S \wedge T & \text{inter}
   \end{align*}
 \end{frame} 
 
 
 \begin{frame}
-  \frametitle{DOT : quelques règles de typage}
+  \frametitle{DOT - Quelques règles de typage}
+  \begin{center}
+    \Huge{...}
+  \end{center}
   \begin{mathpar}
     \inferrule
     {\Gamma \vdash x : \left\{ A : S .. T \right\}}
@@ -382,6 +413,9 @@
     {\Gamma \vdash x : \mu(z : T^{z})}
     {\Gamma \vdash x : T^{x}}  \quad (\textsc{VAR-UNPACK})
   \end{mathpar}
+  \begin{center}
+    \Huge{...}
+  \end{center}
 \end{frame}
 
 %\input{dot_rules}
@@ -390,34 +424,38 @@
   \frametitle{DOT - Remarques}
   \begin{itemize}
   \item Pas de règles de sous-typage pour les types récursifs $\Rightarrow$
-    utilisation de règles de typage (VAR-PACK, VAR-UNPACK) suivies de règles de
-    sous-typage pour les comparer.
-  \item Règles de sous-typage dépendent du typage (SEL <: et <: SEL). \textbf{Pas usuel}.
+    (VAR-PACK, VAR-UNPACK) + règles de sous-typage.
+  \item Règles de sous-typage dépendent du typage (e.g. SEL <: et <: SEL). \textbf{Pas usuel}.
+  \item Problème des mauvaises bornes. Si $x : \left\{ A : Top .. Bottom
+    \right\} \in \Gamma$, alors $\Gamma \vdash S <: T$ pour tous $S, T$ par (SEL <:),
+    (<: SEL) et (S-TRANS).
   \end{itemize}
 \end{frame}
 
-\section{Implémentation : RML}
+\section{Implémentation - RML}
 
 \begin{frame}
 	\begin{center}
-		\Huge{Implémentation de DOT en OCaml : RML}
+		\Huge{Implémentation de DOT en OCaml - RML}
 	\end{center}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Implémentation : remarques}
+  \frametitle{Implémentation - Remarques}
 	\begin{center}
     \begin{enumerate}
       \item Aucun article ne décrit l'implémentation d'algorithmes de typage et
         de sous-typage pour DOT.
-      \item Besoin de définir un langage de surface (= un langage plus haut
-        niveau et plus facile à lire que le calcul théorique).
+      \item Besoin de définir un langage de surface (parseur).
       \item RML implémente des sucres syntaxiques pour écrire plus
         facilement des programmes (fonction à plusieurs arguments, applications
-        avec plusieurs arguments).
+        avec plusieurs arguments), gérés lors du parsing.
       \item RML implémente un algorithme d'inférence de type pour les modules
         (terme $\nu(x)d$ en plus de $\nu(x : T)d$).
         Dans DOT, la définition d'un enregistrement récursif est obligatoirement liée à un type.
+      \item RML fournit une librairie standard avec des entiers, des flottants,
+        des chaines de caractères, des listes, etc.
+      \item Possibilité de voir les arbres de dérivation.
       \end{enumerate}
 	\end{center}
 \end{frame}
@@ -451,7 +489,7 @@
 
 
 \begin{frame}
-  \frametitle{Implémentation : pas si facile...}
+  \frametitle{Implémentation - Pas si facile...}
   Passer de la théorie à l'implémentation n'est pas facile !
   \begin{enumerate}
   \item Gestion des variables libres et liées (utilisation d'AlphaLib).
@@ -474,7 +512,15 @@
 %\end{frame}
 
 \begin{frame}
-  \frametitle{Implémentation : problèmes}
+  \frametitle{Implémentation - Problèmes}
+  \begin{enumerate}
+  \item DOT n'est pas stable par insertion de binding locaux variable-variable.
+    \inputminted{OCaml}{codes/terms_binding_variable.rml}
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Implémentation - Problèmes}
   \begin{enumerate}
   \item DOT n'est pas stable par insertion de binding locaux variable-variable.
   \item (SEL <:) et (<: SEL) nécessite un algorithme intermédiaire
@@ -497,6 +543,7 @@
     \end{mathpar}
 \end{frame}
 
+
 \section*{Travail futur}
 
 \begin{frame}
@@ -506,16 +553,21 @@
 \end{frame}
 
 \begin{frame}
+  \frametitle{Travail futur}
 	\begin{center}
     \begin{itemize}
     \item Résoudre le problème des questions déjà posées (en cours, plusieurs idées).
     \item Evaluateur.
-    \item Interpréteur intéractif.
-    \item TODO
+    \item Interpréteur interactif.
     \end{itemize}
 	\end{center}
 \end{frame}
 
+\begin{frame}
+  \begin{center}
+    \Huge{Merci}
+  \end{center}
+\end{frame}
 
 
 %

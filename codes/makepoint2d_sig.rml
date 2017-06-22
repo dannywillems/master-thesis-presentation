@@ -2,17 +2,12 @@ forall(typ : sig(self)
   type t = Nothing .. Any
   val plus : self.t -> self.t -> self.t
 end) sig(point)
-  type t = sig('self)
-    val x : typ.t
+  type t = sig('self) (* Enregistrement *)
+    val x : typ.t (* Borne inférieure *)
     val y : typ.t
   end .. sig('self)
-    val x : typ.t
+    val x : typ.t (* Borne supérieure *)
     val y : typ.t
   end
-  val add : forall(p1 : point.t)
-            forall(p2 : point.t)
-    sig('self)
-      val x : typ.t
-      val y : typ.t
-    end
+  (* Fonction add... *)
 end
