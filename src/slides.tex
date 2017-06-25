@@ -390,7 +390,7 @@
 
 
 \begin{frame}
-  \frametitle{DOT - Quelques règles de typage}
+  \frametitle{DOT - Quelques règles de typage et de sous-typage}
   \begin{center}
     \Huge{...}
   \end{center}
@@ -453,15 +453,15 @@
       \item RML implémente un algorithme d'inférence de type pour les modules
         (terme $\nu(x)d$ en plus de $\nu(x : T)d$).
         Dans DOT, la définition d'un enregistrement récursif est obligatoirement liée à un type.
-      \item RML fournit une librairie standard avec des entiers, des flottants,
-        des chaines de caractères, des listes, etc.
-      \item Possibilité de voir les arbres de dérivation.
+%      \item RML fournit une librairie standard avec des entiers, des flottants,
+%        des chaines de caractères, des listes, etc.
+%      \item Possibilité de voir les arbres de dérivation.
       \end{enumerate}
 	\end{center}
 \end{frame}
 
 \begin{frame}
-  \frametitle{RML - module = enregistrement}
+  \frametitle{RML - Module = Enregistrement}
   \inputminted{OCaml}{codes/point2d.rml}
   \begin{itemize}
   \item $\nu(x) d \rightarrow$ struct d end
@@ -473,17 +473,17 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{RML - module = enregistrement - Type}
+  \frametitle{RML - Module = Enregistrement - Type}
   \inputminted{OCaml}{codes/point2d.rmli}
 \end{frame}
 
 \begin{frame}
-  \frametitle{RML - foncteur = fonction}
+  \frametitle{RML - Foncteur = Fonction}
   \inputminted{OCaml}{codes/makepoint2d.rml}
 \end{frame}
 
 \begin{frame}
-  \frametitle{RML - foncteur = fonction - Type}
+  \frametitle{RML - Foncteur = Fonction - Type}
   \inputminted{OCaml}{codes/makepoint2d_sig.rml}
 \end{frame}
 
@@ -494,10 +494,10 @@
   \begin{enumerate}
   \item Gestion des variables libres et liées (utilisation d'AlphaLib).
   \item Un même jugement de typage peut être dérivé de plusieurs manières.
-  \item Une même question $S <: T$ peut être posée plusieurs fois (ex: liste
-    avec tail).
   \item Indécidabilité du sous-typage $\Rightarrow$ il n'existe pas d'algorithme
     qui termine sur chaque entrée et qui soit correct et complet.
+  \item Une même question $S <: T$ peut être posée plusieurs fois (ex: liste
+    avec tail).
   \end{enumerate}
 \end{frame}
 
@@ -523,9 +523,8 @@
   \frametitle{Implémentation - Problèmes}
   \begin{enumerate}
   \item DOT n'est pas stable par insertion de binding locaux variable-variable.
-  \item (SEL <:) et (<: SEL) nécessite un algorithme intermédiaire
-    (best\_bound) dans le cas où une question $x.A <: y.A$ est posée. Ce dernier
-    n'est pas évident !
+  \item (SEL <:) et (<: SEL) nécessite un algorithme intermédiaire appelé best\_bound\footnote{Ce dernier
+    n'est pas évident !}.
   \end{enumerate}
     \begin{mathpar}
       \inferrule
@@ -557,6 +556,7 @@
 	\begin{center}
     \begin{itemize}
     \item Résoudre le problème des questions déjà posées (en cours, plusieurs idées).
+    \item Améliorer les algorithmes et montrer qu'ils sont complets et corrects.
     \item Evaluateur.
     \item Interpréteur interactif.
     \end{itemize}
